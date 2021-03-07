@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/number_symbols_data.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
