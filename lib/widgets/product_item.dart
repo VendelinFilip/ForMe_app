@@ -1,3 +1,5 @@
+import 'package:ForMe_app/providers/auth.dart';
+
 import '../providers/product.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +17,7 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -38,10 +41,13 @@ class ProductItem extends StatelessWidget {
               icon: Icon(
                 product.isFavorite ? Icons.favorite : Icons.favorite_border,
               ),
-              onPressed: () {
-                product.toggleFavoriteStatus(context);
-              },
               color: Theme.of(context).primaryColor,
+              onPressed: () {
+                product.toggleFavoriteStatus(
+                  context,
+                  authData.userId,
+                );
+              },
             ),
           ),
           trailing: IconButton(

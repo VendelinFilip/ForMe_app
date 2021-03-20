@@ -21,7 +21,11 @@ class CartItem {
 }
 
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items = {};
+  final String authToken;
+  final String userId;
+  Map<String, CartItem> _items;
+
+  Cart(this.authToken, this.userId, this._items);
 
   Map<String, CartItem> get items {
     return {..._items};
@@ -47,7 +51,8 @@ class Cart with ChangeNotifier {
       cart.totalAmount,
     );
 
-    const cartUrl = 'https://forme-afb88-default-rtdb.firebaseio.com/cart.json';
+    final cartUrl =
+        'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId.json?auth=$authToken';
     final response = await http.delete(cartUrl);
 
     if (response.statusCode >= 400) {
@@ -58,7 +63,8 @@ class Cart with ChangeNotifier {
   }
 
   Future<void> fetchAndSetCartItems() async {
-    const url = 'https://forme-afb88-default-rtdb.firebaseio.com/cart.json';
+    final url =
+        'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -89,8 +95,7 @@ class Cart with ChangeNotifier {
   ) async {
     if (_items.containsKey(productId)) {
       final url =
-          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$productId.json';
-      //TODO remove SnackBar
+          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
 
       final existingCartQuantityItem = await http.get(url);
       final previousQuantity =
@@ -116,7 +121,7 @@ class Cart with ChangeNotifier {
       }
     } else {
       final url =
-          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$productId.json';
+          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       try {
         final response = await http.patch(
           url,
@@ -149,18 +154,13 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeItem(String productId) {
-    _items.remove(productId);
-    notifyListeners();
-  }
-
   Future<void> removeSingleItem(String productId) async {
     if (!_items.containsKey(productId)) {
       return;
     }
     if (_items[productId].quantity > 1) {
       final url =
-          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$productId.json';
+          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       final response = await http.patch(
         url,
         body: json.encode({
@@ -192,7 +192,7 @@ class Cart with ChangeNotifier {
     } else {
       final existingCartItem = _items[productId];
       final url =
-          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$productId.json';
+          'https://forme-afb88-default-rtdb.firebaseio.com/cart/$userId/$productId.json?auth=$authToken';
       final response = await http.delete(url);
       _items.remove(productId);
       if (response.statusCode >= 400) {

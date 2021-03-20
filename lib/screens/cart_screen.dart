@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
-import '../providers/orders.dart';
 
 class CartScreen extends StatefulWidget {
   static const routeName = '/cart';
@@ -65,7 +64,7 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                           backgroundColor: Theme.of(context).primaryColor,
                         ),
-                        orderButton(cart: cart)
+                        OrderButton(cart: cart)
                       ],
                     ),
                   ),
@@ -114,7 +113,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                               backgroundColor: Theme.of(context).primaryColor,
                             ),
-                            orderButton(cart: cart)
+                            OrderButton(cart: cart)
                           ],
                         ),
                       ),
@@ -138,8 +137,8 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-class orderButton extends StatefulWidget {
-  const orderButton({
+class OrderButton extends StatefulWidget {
+  const OrderButton({
     Key key,
     @required this.cart,
   }) : super(key: key);
@@ -147,10 +146,10 @@ class orderButton extends StatefulWidget {
   final Cart cart;
 
   @override
-  orderButtonState createState() => orderButtonState();
+  OrderButtonState createState() => OrderButtonState();
 }
 
-class orderButtonState extends State<orderButton> {
+class OrderButtonState extends State<OrderButton> {
   var _isLoading = false;
 
   @override

@@ -43,6 +43,10 @@ class ProductsProvider with ChangeNotifier {
   ];
 
   //var _showFavoritesOnly = false;
+  final String authToken;
+  final String userId;
+
+  ProductsProvider(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     //if (_showFavoritesOnly) {
@@ -68,8 +72,11 @@ class ProductsProvider with ChangeNotifier {
   //  _showFavoritesOnly = false;
   //}
 
-  Future<void> fetchAndSetProducts() async {
-    const url = 'https://forme-afb88-default-rtdb.firebaseio.com/products.json';
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    var url =
+        'https://forme-afb88-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -77,6 +84,10 @@ class ProductsProvider with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      final favUrl =
+          'https://forme-afb88-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(favUrl);
+      final favoriteData = json.decode(favoriteResponse.body);
       extractedData.forEach((productId, productData) {
         loadedProducts.add(
           Product(
@@ -84,7 +95,8 @@ class ProductsProvider with ChangeNotifier {
             title: productData['title'],
             description: productData['description'],
             price: productData['price'],
-            isFavorite: productData['isFavorite'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[productId] ?? false,
             imageUrl: productData['imageUrl'],
           ),
         );
@@ -98,7 +110,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    const url = 'https://forme-afb88-default-rtdb.firebaseio.com/products.json';
+    final url =
+        'https://forme-afb88-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
@@ -107,7 +120,7 @@ class ProductsProvider with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavorite': product.isFavorite,
+          'creatorId': userId,
         }),
       );
       final newProduct = Product(
@@ -126,13 +139,14 @@ class ProductsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> toggleHttpFavorite(String id, bool isFavorite) async {
+  Future<void> toggleHttpFavorite(
+      String id, bool isFavorite, String userId) async {
     final productIndex = _items.indexWhere((product) => product.id == id);
     try {
       if (productIndex >= 0) {
         final url =
-            'https://forme-afb88-default-rtdb.firebaseio.com/products/$id.json';
-        final response = await http.patch(
+            'https://forme-afb88-default-rtdb.firebaseio.com/userFavorites/$userId/$id.json?auth=$authToken';
+        final response = await http.put(
           url,
           body: json.encode({
             'isFavorite': !isFavorite,
@@ -155,7 +169,7 @@ class ProductsProvider with ChangeNotifier {
     final productIndex = _items.indexWhere((product) => product.id == id);
     if (productIndex >= 0) {
       final url =
-          'https://forme-afb88-default-rtdb.firebaseio.com/products/$id.json';
+          'https://forme-afb88-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
       await http.patch(
         url,
         body: json.encode({
@@ -172,7 +186,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url =
-        'https://forme-afb88-default-rtdb.firebaseio.com/products/$id.json';
+        'https://forme-afb88-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
     final existingProductIndex =
         _items.indexWhere((product) => product.id == id);
     var existingProduct = _items[existingProductIndex];

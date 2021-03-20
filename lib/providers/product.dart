@@ -20,10 +20,10 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  void toggleFavoriteStatus(BuildContext context) async {
+  void toggleFavoriteStatus(BuildContext context, String userId) async {
     isFavorite = !isFavorite;
     notifyListeners();
     await Provider.of<ProductsProvider>(context, listen: false)
-        .toggleHttpFavorite(id, !isFavorite);
+        .toggleHttpFavorite(id, !isFavorite, userId);
   }
 }
