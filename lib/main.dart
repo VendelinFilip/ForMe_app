@@ -1,3 +1,4 @@
+import 'package:ForMe_app/helpers/custom_route.dart';
 import 'package:ForMe_app/providers/auth.dart';
 import 'package:ForMe_app/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,12 @@ class MyApp extends StatelessWidget {
             primaryColor: Colors.red[700],
             accentColor: Colors.black,
             fontFamily: 'Lato',
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: CustomPageTransitionBuilder(),
+                TargetPlatform.iOS: CustomPageTransitionBuilder(),
+              },
+            ),
           ),
           home: authData.isAuth
               ? ProductsOverViewScreen()
